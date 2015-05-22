@@ -21,21 +21,26 @@ declare #fields cursor for
 	and table_name = @table
 	order by ordinal_position
 for read only
+
 open #fields
+
 insert into @tab_res values ('declare @z char(1)=char(0x00),@c char(1)='' '',@n char(4)=''null'',@a char(1)='''''''''),
 ('select ''insert into '+@schema+'.'+@table+' values(''')
 fetch #fields into @partial
 	set @result='+replace(isnull(@a+'+@partial+'+@a,@n),@z,@c)'
 	insert into @tab_res values(cast(@result as varchar(100)))
 while @@fetch_status = 0
-	begin
-	  fetch #fields into @partial
-	  set @result='+'',''+replace(isnull(@a+'+@partial+'+@a,@n),@z,@c)'
-	  if (@@fetch_status = 0)
-	  insert into @tab_res values(cast(@result as varchar(100)))
-	end
-select * from @tab_res
+begin
+	fetch #fields into @partial
+	set @result='+'',''+replace(isnull(@a+'+@partial+'+@a,@n),@z,@c)'
+	if (@@fetch_status = 0)
+	insert into @tab_res values(cast(@result as varchar(100)))
+end
+
 insert into @tab_res values('+'')'' from mazp.'+@table+' with(nolock)')
+select * from @tab_res
+
 close #fields
 deallocate #fields
+
 go
